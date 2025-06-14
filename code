@@ -1,0 +1,29 @@
+from flask import Flask, jsonify
+import requests
+
+app = Flask(__name__)
+
+@app.route("/red_mushroom")
+def red_mushroom_data():
+    url = "https://api.hypixel.net/skyblock/bazaar"
+    response = requests.get(url)
+    
+    if response.status_code != 200:
+        return jsonify({"error": "Failed to fetch Hypixel data"}), 500
+    
+    data = response.json()
+    key = "INK_SACK:3"
+
+    if key not in data["products"]:
+        return jsonify({"error": "Red mushroom data not found"}), 404
+
+    buy_orders = sorted(
+        data["products"][key]["buy_summary"],
+        key=lambda x: x["pricePerUnit"],
+        reverse=True
+    )[:10]
+
+    return jsonify(buy_orders)
+
+if __name__ == "__main__":
+    app.run()
