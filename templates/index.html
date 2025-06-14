@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Red Mushroom Buy Orders</title>
+  <style>
+    body { font-family: Arial; padding: 20px; background: #f9f9f9; }
+    h1 { color: #2c3e50; }
+    ul { list-style-type: none; padding: 0; }
+    li { margin: 10px 0; background: #ecf0f1; padding: 10px; border-radius: 5px; }
+  </style>
+</head>
+<body>
+
+<h1>🛒 Top 10 Red Mushroom Buy Orders</h1>
+
+{% if error %}
+  <p style="color:red;">{{ error }}</p>
+{% else %}
+  <ul>
+    {% for order in orders %}
+      <li>
+        {{ loop.index }}. {{ order.amount }} units @ {{ order.pricePerUnit }} coins
+        (Orders: {{ order.orders }})
+      </li>
+    {% endfor %}
+  </ul>
+{% endif %}
+
+</body>
+</html>
