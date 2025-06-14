@@ -1,2 +1,0 @@
-# ctdawn
-Cat Dawn
