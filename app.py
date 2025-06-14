@@ -1,8 +1,16 @@
 from flask import Flask, render_template
 import requests
 import os
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
+
+cached_data = {
+    "orders": None,
+    "timestamp": None
+}
+
+CACHE_TTL = 30  # Reduced from 60 to 30 seconds
 
 def get_red_mushroom_buy_orders():
     url = "https://api.hypixel.net/skyblock/bazaar" 
@@ -26,13 +34,25 @@ def get_red_mushroom_buy_orders():
         return False
 
 
+def get_cached_red_mushroom_buy_orders():
+    now = datetime.now()
+    if (cached_data["orders"] is None or
+        (now - cached_data["timestamp"]).seconds > CACHE_TTL):
+        print("Fetching fresh data...")
+        orders = get_red_mushroom_buy_orders()
+        cached_data["orders"] = orders
+        cached_data["timestamp"] = now
+    else:
+        print("Using cached data")
+    return cached_data["orders"]
+
+
 @app.route("/")
 def home():
-    orders = get_red_mushroom_buy_orders()
+    orders = get_cached_red_mushroom_buy_orders()
 
     if orders is False:
-        error = f"Failed to fetch data. HTTP Status: {response.status_code}"
-        return render_template("index.html", error=error)
+        return render_template("index.html", error="Failed to fetch data.")
     elif orders is None:
         return render_template("index.html", error="Red Mushroom data not found.")
     else:
@@ -40,5 +60,4 @@ def home():
 
 
 if __name__ == "__main__":
-    # Use the PORT environment variable provided by Render
     app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 5000)))
